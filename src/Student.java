@@ -1,4 +1,4 @@
-public class Student extends User {
+public class Student extends User implements Notifiable{
 
     private String major;
     private int graduationYear;
@@ -27,4 +27,10 @@ public class Student extends User {
         return "Student[ID=" + getId() + ", Name=" + getName() +
                 ", Major=" + major + ", GraduationYear=" + graduationYear + "]";
     }
+
+    @Override
+    public void notify(String message) {
+        System.out.println("Notification for Student " + getName() + ": " + message);
+    }
+
 }
