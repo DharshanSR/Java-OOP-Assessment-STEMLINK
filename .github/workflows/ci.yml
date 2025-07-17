@@ -1,4 +1,4 @@
-name: Java CI
+name: Java CI/CD
 
 on:
   push:
@@ -20,3 +20,50 @@ jobs:
         run: javac src/*.java
       - name: Run tests
         run: echo "No test framework detected. Add tests for full CI."
+      
+      - name: Build Docker image
+        run: docker build -t java-oop-assessment:${{ github.sha }} .
+      
+      - name: Save Docker image
+        run: docker save java-oop-assessment:${{ github.sha }} > java-oop-assessment.tar
+      
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: java-oop-assessment.tar
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+      
+      - name: Load Docker image
+        run: docker load < java-oop-assessment.tar
+      
+      - name: Tag image as latest
+        run: docker tag java-oop-assessment:${{ github.sha }} java-oop-assessment:latest
+      
+      - name: Validate Kubernetes manifests
+        run: |
+          kubectl apply --dry-run=client -f k8s-deployment.yaml
+          kubectl apply --dry-run=client -f k8s-service.yaml
+      
+      - name: Deploy to staging (simulation)
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          echo "Docker image: java-oop-assessment:${{ github.sha }}"
+          echo "Kubernetes manifests validated ✅"
+          echo "Deployment successful! 🎉"
+          echo ""
+          echo "To deploy to actual Kubernetes cluster:"
+          echo "1. Set up cluster credentials"
+          echo "2. Run: kubectl apply -f k8s-deployment.yaml"
+          echo "3. Run: kubectl apply -f k8s-service.yaml"

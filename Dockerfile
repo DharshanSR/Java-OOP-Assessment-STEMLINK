@@ -3,4 +3,4 @@ WORKDIR /app
 COPY src/ /app/src/
 COPY Java-OOP-Assessment-STEMLINK.iml /app/
 RUN javac src/*.java
-CMD ["java", "-cp", "src", "BookingPlatform"]
+CMD ["sh", "-c", "cd /app && java -cp src BookingPlatform"]
