@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-oop-assessment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-oop-assessment
+  template:
+    metadata:
+      labels:
+        app: java-oop-assessment
+    spec:
+      containers:
+      - name: java-oop-assessment
+        image: java-oop-assessment:latest
+        imagePullPolicy: Never
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
