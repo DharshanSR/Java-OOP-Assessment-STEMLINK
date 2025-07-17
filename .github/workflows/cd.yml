@@ -35,6 +35,26 @@ jobs:
           docker build -t java-oop-assessment:${{ github.sha }} .
           docker tag java-oop-assessment:${{ github.sha }} java-oop-assessment:latest
       
+      - name: Validate Kubernetes manifests
+        run: |
+          echo "🔍 Validating Kubernetes manifests..."
+          
+          # Check if manifests are valid YAML
+          if ! command -v yq &> /dev/null; then
+            echo "Installing yq for YAML validation..."
+            sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
+          fi
+          
+          echo "✅ Checking k8s-deployment.yaml syntax..."
+          yq eval . k8s-deployment.yaml > /dev/null
+          
+          echo "✅ Checking k8s-service.yaml syntax..."
+          yq eval . k8s-service.yaml > /dev/null
+          
+          echo "✅ Kubernetes manifests are valid YAML"
+          echo "ℹ️  Note: Cluster connectivity validation skipped (no cluster available)"
+      
       - name: Deploy to Kubernetes (simulation)
         run: |
           echo "🚀 Deploying to ${{ github.event.inputs.environment || 'production' }} environment..."
